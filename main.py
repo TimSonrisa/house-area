@@ -1,5 +1,5 @@
 # Idea: I can factorize the distances by the minimal distance provided in the sequence:
-
+# Idea: When populating the path just add +1, this way I can now if the pass was crossed of value > 1 is appearing
 import numpy as np
 
 
