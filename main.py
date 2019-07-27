@@ -1,11 +1,10 @@
 # Idea: I can factorize the distances by the minimal distance provided in the sequence:
 # Idea: When populating the path just add +1, this way I can now if the pass was crossed of value > 1 is appearing
+
 import numpy as np
 
 
-def mouse_path(path):
-    path = path.replace('L', ',L,').replace('R', ',R,')
-    path = [el for el in path.split(',')]
+def calc_distances(path):
 
     right_turns = 'NESW'
     left_turns = 'NWSE'
@@ -27,43 +26,77 @@ def mouse_path(path):
             elif cur_direction == 'N':
                 tot_dist[1] -= int(element)
 
-            if tot_dist[0] > max_dist[0]:
-                max_dist[0] = tot_dist[0]
-            if tot_dist[1] > max_dist[1]:
-                max_dist[1] = tot_dist[1]
-            if tot_dist[0] < min_dist[0]:
-                min_dist[0] = tot_dist[0]
-            if tot_dist[1] < min_dist[1]:
-                min_dist[1] = tot_dist[1]
+            max_dist[0] = max(tot_dist[0], max_dist[0])
+            max_dist[1] = max(tot_dist[1], max_dist[1])
+
+            min_dist[0] = min(tot_dist[0], min_dist[0])
+            min_dist[1] = min(tot_dist[1], min_dist[1])
 
         else:
             if element == 'R':
-                cur_direction_ind = right_turns.index(cur_direction)
-                new_direction_ind = (cur_direction_ind + 1) % 4
-                cur_direction = right_turns[new_direction_ind]
-
+                cur_turns = right_turns
             elif element == 'L':
-                cur_direction_ind = left_turns.index(cur_direction)
-                new_direction_ind = (cur_direction_ind + 1) % 4
-                cur_direction = left_turns[new_direction_ind]
+                cur_turns = left_turns
 
-        if tot_dist == (0, 0) and i < len(path)-1:
+            cur_direction_ind = cur_turns.index(cur_direction)
+            new_direction_ind = (cur_direction_ind + 1) % 4
+            cur_direction = cur_turns[new_direction_ind]
+
+        if tot_dist == (0, 0) and i < len(path) - 1:
             return None
 
     return max_dist, min_dist
 
-    """
-    prev_turn = 'S'
-    prev_dist = 0
-    total = 0
 
-    for element in path:
-        if element == 'R' or element == 'L':
-            cur_turn = element
+def trace_house(house, path):
+
+    right_turns = 'NESW'
+    left_turns = 'NWSE'
+
+    prev_x = np.floor(len(house)/2)
+    prev_y = np.floor(len(house)/2)
+
+    cur_direction = 'E'
+
+    for i, element in enumerate(path):
+        if element.isdigit():
+            if cur_direction == 'E':
+                house[prev_x][prev_y+1:prev_y+element] = house[prev_x][prev_y+1:prev_y+element] + 1
+            elif cur_direction == 'W':
+                house[prev_x][prev_y-1:prev_y+element] = house[prev_x][prev_y-1:prev_y+element] + 1
+            if cur_direction == 'S':
+                house[prev_x][prev_y+1:prev_y+element] = house[prev_x][prev_y+1:prev_y+element] + 1
+            elif cur_direction == 'N':
+                tot_dist[1] -= int(element)
+
         else:
-            if prev_turn == 'R' and cur_turn == 'R':
-    """
+            if element == 'R':
+                cur_turns = right_turns
+            elif element == 'L':
+                cur_turns = left_turns
 
+            cur_direction_ind = cur_turns.index(cur_direction)
+            new_direction_ind = (cur_direction_ind + 1) % 4
+            cur_direction = cur_turns[new_direction_ind]
+
+    return house
+
+
+def mouse_path(path):
+    path = path.replace('L', ',L,').replace('R', ',R,')
+    path = [el for el in path.split(',')]
+
+    # Calculate different distance metrics from the mouse path:
+    max_dist, min_dist = calc_distances(path)
+
+    # Determine the maximal dimensions of the house and create a NumPy array to represent it:
+    dimension = np.array(max_dist) - np.array(min_dist)
+    house = np.zeros([2*dimension[0], 2*dimension[1]])
+
+    # Trace the path of the mouse on the np array of the house:
+    trace_house(house, path)
+
+    return max_dist, min_dist
 
 
 print('Example Tests')
@@ -78,7 +111,7 @@ example_tests = (
     ('4L10L20L30L30L50L40L60L60L85L77L10L67R72R45R47R33R30R17R15R5R5', 2950)
 )
 
-result1 = mouse_path(example_tests[2][0])
+result1 = mouse_path(example_tests[1][0])
 # print(result1)
 
 
@@ -86,4 +119,3 @@ for inp, out in example_tests:
     print(mouse_path(inp))
 
 print('<COMPLETEDIN::>')
-
