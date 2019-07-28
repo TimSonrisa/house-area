@@ -35,7 +35,7 @@ def calc_distances(path):
         else:
             if element == 'R':
                 cur_turns = right_turns
-            elif element == 'L':
+            else:
                 cur_turns = left_turns
 
             cur_direction_ind = cur_turns.index(cur_direction)
@@ -53,26 +53,35 @@ def trace_house(house, path):
     right_turns = 'NESW'
     left_turns = 'NWSE'
 
-    prev_x = np.floor(len(house)/2)
-    prev_y = np.floor(len(house)/2)
+    prev_x = int(np.floor(house.shape[1]/2))
+    prev_y = int(np.floor(house.shape[0]/2))
 
     cur_direction = 'E'
 
     for i, element in enumerate(path):
         if element.isdigit():
+            step = int(element)
             if cur_direction == 'E':
-                house[prev_x][prev_y+1:prev_y+element] = house[prev_x][prev_y+1:prev_y+element] + 1
+                new_x = prev_x + step
+                new_y = prev_y
             elif cur_direction == 'W':
-                house[prev_x][prev_y-1:prev_y+element] = house[prev_x][prev_y-1:prev_y+element] + 1
-            if cur_direction == 'S':
-                house[prev_x][prev_y+1:prev_y+element] = house[prev_x][prev_y+1:prev_y+element] + 1
+                new_x = prev_x - step
+                new_y = prev_y
+            elif cur_direction == 'S':
+                new_x = prev_x
+                new_y = prev_y + step
             elif cur_direction == 'N':
-                tot_dist[1] -= int(element)
+                new_x = prev_x
+                new_y = prev_y - step
+            else:
+                print('No such direction!')
+
+            house[prev_x:new_x][prev_y:new_y] += 1
 
         else:
             if element == 'R':
                 cur_turns = right_turns
-            elif element == 'L':
+            else:
                 cur_turns = left_turns
 
             cur_direction_ind = cur_turns.index(cur_direction)
@@ -91,7 +100,7 @@ def mouse_path(path):
 
     # Determine the maximal dimensions of the house and create a NumPy array to represent it:
     dimension = np.array(max_dist) - np.array(min_dist)
-    house = np.zeros([2*dimension[0], 2*dimension[1]])
+    house = np.zeros([4*dimension[0], 4*dimension[1]])
 
     # Trace the path of the mouse on the np array of the house:
     trace_house(house, path)
@@ -111,7 +120,7 @@ example_tests = (
     ('4L10L20L30L30L50L40L60L60L85L77L10L67R72R45R47R33R30R17R15R5R5', 2950)
 )
 
-result1 = mouse_path(example_tests[1][0])
+result1 = mouse_path(example_tests[0][0])
 # print(result1)
 
 
